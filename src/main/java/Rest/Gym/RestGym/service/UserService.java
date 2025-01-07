@@ -1,6 +1,7 @@
 package Rest.Gym.RestGym.service;
 
 import Rest.Gym.RestGym.dto.RegistrationUserDto;
+import Rest.Gym.RestGym.dto.UserDto;
 import Rest.Gym.RestGym.model.User;
 import Rest.Gym.RestGym.repository.UserRepository;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -12,7 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -52,5 +55,17 @@ public class UserService implements UserDetailsService {
 
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
+    }
+
+    public List<UserDto> findByRole(String role) {
+        List<User> users = userRepository.findByRole(role);
+        return users.stream()
+                .map(user -> new UserDto(
+                        user.getId(),
+                        user.getUsername(),
+                        user.getFullname(),
+                        user.getEmail()
+                ))
+                .collect(Collectors.toList());
     }
 }

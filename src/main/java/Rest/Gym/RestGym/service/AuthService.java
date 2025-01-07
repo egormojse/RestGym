@@ -7,6 +7,7 @@ import Rest.Gym.RestGym.exceptions.AppError;
 import Rest.Gym.RestGym.model.User;
 import Rest.Gym.RestGym.util.JwtTokenUtils;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -34,14 +35,28 @@ public class AuthService {
     }
 
 
-    public ResponseEntity<?> getToken(@RequestBody JwtRequest jwtRequest) {
+    public ResponseEntity<?> getToken(JwtRequest jwtRequest) {
         try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(jwtRequest.getUsername(), jwtRequest.getPassword()));
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            jwtRequest.getUsername(),
+                            jwtRequest.getPassword()
+                    )
+            );
+
             UserDetails user = userService.loadUserByUsername(jwtRequest.getUsername());
             String token = jwtTokenUtils.generateToken(user);
-            return ResponseEntity.ok(new JwtResponse(token));
+
+            return ResponseEntity
+                    .ok()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(new JwtResponse(token));
+
         } catch (BadCredentialsException e) {
-            return new ResponseEntity<>(new AppError(HttpStatus.UNAUTHORIZED.value(), "Неверный логин или пароль"), HttpStatus.UNAUTHORIZED);
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(new AppError(HttpStatus.UNAUTHORIZED.value(), "Неверный логин или пароль"));
         }
     }
 
