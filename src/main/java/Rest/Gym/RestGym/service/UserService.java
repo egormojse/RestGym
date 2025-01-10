@@ -2,6 +2,7 @@ package Rest.Gym.RestGym.service;
 
 import Rest.Gym.RestGym.dto.RegistrationUserDto;
 import Rest.Gym.RestGym.dto.UserDto;
+import Rest.Gym.RestGym.exceptions.UserNotFoundException;
 import Rest.Gym.RestGym.model.User;
 import Rest.Gym.RestGym.repository.UserRepository;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -57,6 +58,11 @@ public class UserService implements UserDetailsService {
         return userRepository.findByUsername(username);
     }
 
+    public User findById(int id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с ID: " + id));
+    }
+
     public List<UserDto> findByRole(String role) {
         List<User> users = userRepository.findByRole(role);
         return users.stream()
@@ -67,5 +73,13 @@ public class UserService implements UserDetailsService {
                         user.getEmail()
                 ))
                 .collect(Collectors.toList());
+    }
+
+    public boolean deleteUser(int id) {
+        if (!userRepository.existsById(id)) {
+            return false;
+        }
+        userRepository.deleteById(id);
+        return true;
     }
 }

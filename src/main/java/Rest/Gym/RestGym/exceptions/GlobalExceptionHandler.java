@@ -16,4 +16,13 @@ public class GlobalExceptionHandler {
         );
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(BookingException.class)
+    public ResponseEntity<ErrorResponse> handleBookingException(BookingException ex) {
+        ErrorResponse error = new ErrorResponse(
+                "BOOKING_ERROR",
+                ex.getMessage()
+        );
+        return ResponseEntity.badRequest().body(error);
+    }
 }
