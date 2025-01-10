@@ -42,4 +42,6 @@ public class UserController {
         List<UserDto> spa = userService.findByRole("SPA");
         return ResponseEntity.ok(spa);
     }
+
+
 }
