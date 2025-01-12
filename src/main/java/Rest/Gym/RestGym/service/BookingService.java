@@ -1,6 +1,7 @@
 package Rest.Gym.RestGym.service;
 
 import Rest.Gym.RestGym.dto.BookingDTO;
+import Rest.Gym.RestGym.enums.BookingType;
 import Rest.Gym.RestGym.exceptions.BookingException;
 import Rest.Gym.RestGym.model.Booking;
 import Rest.Gym.RestGym.repository.BookingRepository;
@@ -16,22 +17,58 @@ public class BookingService {
     private final BookingRepository bookingRepository;
     private final UserService userService;
     private final ServiceEntityService serviceEntityService;
+    private final PersonMembershipService personMembershipService;
 
     @Autowired
     public BookingService(BookingRepository bookingRepository,
                           UserService userService,
-                          ServiceEntityService serviceEntityService) {
+                          ServiceEntityService serviceEntityService, PersonMembershipService personMembershipService) {
         this.bookingRepository = bookingRepository;
         this.userService = userService;
         this.serviceEntityService = serviceEntityService;
+        this.personMembershipService = personMembershipService;
     }
 
     public Booking createBooking(BookingDTO bookingDTO) throws ServiceNotFoundException {
+        // First validate the booking time
         validateBookingTime(bookingDTO.getEmployeeId(), bookingDTO.getDateTime());
 
-        Booking booking = new Booking();
-        populateBookingFromDTO(booking, bookingDTO);
-        return bookingRepository.save(booking);
+        // Get service type to determine if it's GYM or SPA
+        Rest.Gym.RestGym.model.Service service = serviceEntityService.getServiceById(bookingDTO.getServiceId());
+        BookingType bookingType = determineBookingType(service); // You'll need to implement this
+
+        // Validate membership and deduct visit
+        try {
+            boolean isValid = personMembershipService.validateAndUseVisit(
+                    bookingDTO.getUserId(),
+                    bookingType
+            );
+
+            if (!isValid) {
+                throw new BookingException("Недостаточно посещений или абонемент истек");
+            }
+
+            // If validation passed, create the booking
+            Booking booking = new Booking();
+            populateBookingFromDTO(booking, bookingDTO);
+            return bookingRepository.save(booking);
+
+        } catch (IllegalStateException e) {
+            // Convert membership service exceptions to booking exceptions
+            throw new BookingException(e.getMessage());
+        }
+    }
+
+    // Helper method to determine booking type based on service
+    private BookingType determineBookingType(Rest.Gym.RestGym.model.Service service) {
+        // Implement logic to determine if service is GYM or SPA
+        // For example:
+        if (service.getType().equals("GYM")) {
+            return BookingType.GYM;
+        } else if (service.getType().equals("SPA")) {
+            return BookingType.SPA;
+        }
+        throw new BookingException("Неизвестный тип услуги");
     }
 
     public List<Booking> getUserBookings(int userId) {

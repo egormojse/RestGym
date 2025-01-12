@@ -103,4 +103,9 @@ public class MembershipService {
                 dto.getSpaVisits()
         );
     }
+
+    public MembershipDto findById(Integer membershipId) {
+        return convertToDto(membershipRepository.findById(membershipId).get());
+    }
+
 }

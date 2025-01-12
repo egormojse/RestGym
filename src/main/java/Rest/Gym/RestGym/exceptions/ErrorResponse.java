@@ -1,6 +1,5 @@
 package Rest.Gym.RestGym.exceptions;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data

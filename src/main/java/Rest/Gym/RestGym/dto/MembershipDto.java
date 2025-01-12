@@ -8,13 +8,15 @@ public class MembershipDto {
     private int spaVisits;
     private double price;
 
-    public MembershipDto(int id, String type, int gymVisits, int spaVisits, double price) {
+    public MembershipDto(Integer id, String type, int gymVisits, int spaVisits, double price) {
         this.id = id;
         this.type = type;
         this.gymVisits = gymVisits;
         this.spaVisits = spaVisits;
         this.price = price;
     }
+
+    public MembershipDto() {}
 
     public int getId() {
         return id;

@@ -20,22 +20,11 @@ public class Service {
     @Column(name="price")
     private double price;
 
-    @Column(name = "is_active")
-    private boolean isActive = true;
-
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(boolean active) {
-        isActive = active;
-    }
 
     public Service(String name, double price, String type) {
         this.name = name;
         this.price = price;
         this.type = type;
-        this.isActive = true;
     }
 
     public Service() {}
